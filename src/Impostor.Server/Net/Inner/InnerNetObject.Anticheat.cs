@@ -47,6 +47,32 @@ namespace Impostor.Server.Net.Inner
             return true;
         }
 
+        protected async ValueTask<bool> ValidateIsAlive(CheatContext context, IClientPlayer sender)
+        {
+            if (sender?.Character?.PlayerInfo != null && sender.Character.PlayerInfo.IsDead)
+            {
+                if (await sender.Client.ReportCheatAsync(context, CheatCategory.Other, "Failed alive check"))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        protected async ValueTask<bool> ValidateTargetIsAlive(CheatContext context, IClientPlayer sender, IClientPlayer? target)
+        {
+            if (target?.Character?.PlayerInfo != null && target.Character.PlayerInfo.IsDead)
+            {
+                if (await sender.Client.ReportCheatAsync(context, CheatCategory.Target, "Failed target alive check"))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         protected async ValueTask<bool> ValidateBroadcast(CheatContext context, IClientPlayer sender, IClientPlayer? target)
         {
             if (target != null)
