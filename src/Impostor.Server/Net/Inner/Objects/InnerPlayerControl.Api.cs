@@ -87,7 +87,7 @@ namespace Impostor.Server.Net.Inner.Objects
         {
             using var writer = Game.StartRpc(NetId, RpcCalls.SendChat);
             writer.Write((ushort)role);
-            writer.Write(false);
+            writer.Write(true);
             await Game.FinishRpcAsync(writer);
         }
 
@@ -100,7 +100,7 @@ namespace Impostor.Server.Net.Inner.Objects
 
             using var writer = Game.StartRpc(NetId, RpcCalls.SendChat);
             writer.Write((ushort)role);
-            writer.Write(false);
+            writer.Write(true);
             await Game.FinishRpcAsync(writer, player.OwnerId);
         }
 
@@ -118,7 +118,7 @@ namespace Impostor.Server.Net.Inner.Objects
             {
                 using var writer = Game.StartRpc(NetId, RpcCalls.SendChat);
                 writer.Write((ushort)role);
-                writer.Write(false);
+                writer.Write(true);
                 await Game.FinishRpcAsync(writer, pc.OwnerId);
             }
         }
