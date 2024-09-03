@@ -83,37 +83,22 @@ namespace Impostor.Server.Net.Inner.Objects
             await Game.FinishRpcAsync(writer, player.OwnerId);
         }
 
-        public async ValueTask SetRoleAsync(RoleTypes role, bool IsIntro = false)
+        public async ValueTask SetRoleAsync(RoleTypes role, bool isIntro = false)
         {
             using var writer = Game.StartRpc(NetId, RpcCalls.SetRole);
 
-            /*
-            if (IsIntro)
+            if (isIntro)
             {
-                if (this != null)
-                {
-                    byte b = 0;
-                    b |= 1;
-
-                    if (this.PlayerInfo.IsDead)
-                    {
-                        b |= 4;
-                    }
-
-                    writer.StartMessage(1);
-                    writer.WritePacked(this.NetId);
-                    writer.Write(b);
-                    writer.EndMessage();
-                }
+                PlayerInfo.Disconnected = true;
+                await PlayerInfo.SerializeAsync(writer, false);
             }
-            */
 
-            writer.Write((ushort)role);
-            writer.Write(true);
+            Rpc44SetRole.Serialize(writer, role, true);
+
             await Game.FinishRpcAsync(writer);
         }
 
-        public async ValueTask SetRoleForAsync(RoleTypes role, IInnerPlayerControl? player = null)
+        public async ValueTask SetRoleForAsync(RoleTypes role, IInnerPlayerControl? player = null, bool isIntro = false)
         {
             if (player == null)
             {
@@ -121,12 +106,19 @@ namespace Impostor.Server.Net.Inner.Objects
             }
 
             using var writer = Game.StartRpc(NetId, RpcCalls.SetRole);
-            writer.Write((ushort)role);
-            writer.Write(true);
+
+            if (isIntro)
+            {
+                PlayerInfo.Disconnected = true;
+                await PlayerInfo.SerializeAsync(writer, false);
+            }
+
+            Rpc44SetRole.Serialize(writer, role, true);
+
             await Game.FinishRpcAsync(writer, player.OwnerId);
         }
 
-        public async ValueTask SetRoleForDesync(RoleTypes role, IInnerPlayerControl?[] players)
+        public async ValueTask SetRoleForDesync(RoleTypes role, IInnerPlayerControl?[] players, bool isIntro = false)
         {
             for (var i = 0; i < players.Length; i++)
             {
@@ -139,8 +131,14 @@ namespace Impostor.Server.Net.Inner.Objects
             foreach (var pc in ClientManager.AllPlayerControls.Where(p => !players.Contains(p)))
             {
                 using var writer = Game.StartRpc(NetId, RpcCalls.SetRole);
-                writer.Write((ushort)role);
-                writer.Write(true);
+
+                if (isIntro)
+                {
+                    PlayerInfo.Disconnected = true;
+                    await PlayerInfo.SerializeAsync(writer, false);
+                }
+
+                Rpc44SetRole.Serialize(writer, role, true);
                 await Game.FinishRpcAsync(writer, pc.OwnerId);
             }
         }
