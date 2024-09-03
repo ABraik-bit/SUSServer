@@ -3,3 +3,5 @@
 /obj
 /.editorconfig
 /.vscode
+/.vs/slnx.sqlite
+/src/Impostor.Server/Properties/PublishProfiles
