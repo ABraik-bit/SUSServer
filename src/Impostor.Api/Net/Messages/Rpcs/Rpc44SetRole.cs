@@ -13,7 +13,7 @@ namespace Impostor.Api.Net.Messages.Rpcs
         public static void Deserialize(IMessageReader reader, out RoleTypes role, out bool canOverrideRole)
         {
             role = (RoleTypes)reader.ReadUInt16();
-            canOverrideRole = true;
+            canOverrideRole = reader.ReadBoolean();
         }
     }
 }

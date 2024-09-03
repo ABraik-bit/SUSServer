@@ -398,12 +398,15 @@ namespace Impostor.Server.Net.Inner.Objects
                         await Game.StartedAsync();
                     }
 
+                    /*
                     if (sender.Character != null)
                     {
-                        await sender.Character.SetRoleAsync(role);
+                        await sender.Character.SetRoleAsync(role, true);
                     }
 
                     return false;
+                    */
+                    break;
                 }
 
                 case RpcCalls.ProtectPlayer:

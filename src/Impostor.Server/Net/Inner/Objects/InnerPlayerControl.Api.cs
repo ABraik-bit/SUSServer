@@ -83,15 +83,37 @@ namespace Impostor.Server.Net.Inner.Objects
             await Game.FinishRpcAsync(writer, player.OwnerId);
         }
 
-        public async ValueTask SetRoleAsync(RoleTypes role)
+        public async ValueTask SetRoleAsync(RoleTypes role, bool IsIntro = false)
         {
             using var writer = Game.StartRpc(NetId, RpcCalls.SetRole);
+
+            /*
+            if (IsIntro)
+            {
+                if (this != null)
+                {
+                    byte b = 0;
+                    b |= 1;
+
+                    if (this.PlayerInfo.IsDead)
+                    {
+                        b |= 4;
+                    }
+
+                    writer.StartMessage(1);
+                    writer.WritePacked(this.NetId);
+                    writer.Write(b);
+                    writer.EndMessage();
+                }
+            }
+            */
+
             writer.Write((ushort)role);
             writer.Write(true);
             await Game.FinishRpcAsync(writer);
         }
 
-        public async ValueTask SetRoleAsync(RoleTypes role, IInnerPlayerControl? player = null)
+        public async ValueTask SetRoleForAsync(RoleTypes role, IInnerPlayerControl? player = null)
         {
             if (player == null)
             {
@@ -104,7 +126,7 @@ namespace Impostor.Server.Net.Inner.Objects
             await Game.FinishRpcAsync(writer, player.OwnerId);
         }
 
-        public async ValueTask SetRoleDesync(RoleTypes role, IInnerPlayerControl?[] players)
+        public async ValueTask SetRoleForDesync(RoleTypes role, IInnerPlayerControl?[] players)
         {
             for (var i = 0; i < players.Length; i++)
             {
