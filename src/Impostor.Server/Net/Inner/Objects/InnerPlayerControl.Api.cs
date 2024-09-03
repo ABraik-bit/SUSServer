@@ -7,6 +7,7 @@ using Impostor.Api.Net.Inner.Objects;
 using Impostor.Api.Net.Inner.Objects.Components;
 using Impostor.Api.Net.Messages.Rpcs;
 using Impostor.Server.Events.Player;
+using Impostor.Server.Net.Manager;
 
 namespace Impostor.Server.Net.Inner.Objects
 {
@@ -80,6 +81,46 @@ namespace Impostor.Server.Net.Inner.Objects
             using var writer = Game.StartRpc(NetId, RpcCalls.SendChat);
             writer.Write(text);
             await Game.FinishRpcAsync(writer, player.OwnerId);
+        }
+
+        public async ValueTask SetRoleAsync(RoleTypes role)
+        {
+            using var writer = Game.StartRpc(NetId, RpcCalls.SendChat);
+            writer.Write((ushort)role);
+            writer.Write(false);
+            await Game.FinishRpcAsync(writer);
+        }
+
+        public async ValueTask SetRoleAsync(RoleTypes role, IInnerPlayerControl? player = null)
+        {
+            if (player == null)
+            {
+                player = this;
+            }
+
+            using var writer = Game.StartRpc(NetId, RpcCalls.SendChat);
+            writer.Write((ushort)role);
+            writer.Write(false);
+            await Game.FinishRpcAsync(writer, player.OwnerId);
+        }
+
+        public async ValueTask SetRoleDesync(RoleTypes role, IInnerPlayerControl?[] players)
+        {
+            for (var i = 0; i < players.Length; i++)
+            {
+                if (players[i] == null)
+                {
+                    players[i] = this;
+                }
+            }
+
+            foreach (var pc in ClientManager.AllPlayerControls.Where(p => !players.Contains(p)))
+            {
+                using var writer = Game.StartRpc(NetId, RpcCalls.SendChat);
+                writer.Write((ushort)role);
+                writer.Write(false);
+                await Game.FinishRpcAsync(writer, pc.OwnerId);
+            }
         }
 
         public async ValueTask MurderPlayerAsync(IInnerPlayerControl target, MurderResultFlags result)

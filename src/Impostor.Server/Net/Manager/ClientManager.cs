@@ -27,8 +27,8 @@ namespace Impostor.Server.Net.Manager
         private readonly IClientFactory _clientFactory;
         private int _idLast;
 
-        public List<ClientBase> allClients = [];
-        public InnerPlayerControl[] AllPlayerControl => allClients.Select(c => c.Player.Character).Where(p => p != null).ToArray();
+        public static List<ClientBase> allClients = [];
+        public static InnerPlayerControl[] AllPlayerControls => allClients.Select(c => c.Player.Character).Where(p => p != null).ToArray();
 
         public ClientManager(ILogger<ClientManager> logger, IEventManager eventManager, IClientFactory clientFactory, ICompatibilityManager compatibilityManager, IOptions<CompatibilityConfig> compatibilityConfig)
         {
