@@ -96,6 +96,12 @@ namespace Impostor.Server.Net.Inner.Objects
             Rpc44SetRole.Serialize(writer, role, true);
 
             await Game.FinishRpcAsync(writer);
+
+            if (isIntro)
+            {
+                PlayerInfo.Disconnected = false;
+                await PlayerInfo.SerializeAsync(writer, false);
+            }
         }
 
         public async ValueTask SetRoleForAsync(RoleTypes role, IInnerPlayerControl? player = null, bool isIntro = false)
@@ -116,6 +122,12 @@ namespace Impostor.Server.Net.Inner.Objects
             Rpc44SetRole.Serialize(writer, role, true);
 
             await Game.FinishRpcAsync(writer, player.OwnerId);
+
+            if (isIntro)
+            {
+                PlayerInfo.Disconnected = false;
+                await PlayerInfo.SerializeAsync(writer, false);
+            }
         }
 
         public async ValueTask SetRoleForDesync(RoleTypes role, IInnerPlayerControl?[] players, bool isIntro = false)
@@ -139,7 +151,14 @@ namespace Impostor.Server.Net.Inner.Objects
                 }
 
                 Rpc44SetRole.Serialize(writer, role, true);
+
                 await Game.FinishRpcAsync(writer, pc.OwnerId);
+
+                if (isIntro)
+                {
+                    PlayerInfo.Disconnected = false;
+                    await PlayerInfo.SerializeAsync(writer, false);
+                }
             }
         }
 
