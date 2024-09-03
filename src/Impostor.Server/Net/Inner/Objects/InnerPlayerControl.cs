@@ -383,8 +383,7 @@ namespace Impostor.Server.Net.Inner.Objects
                         return false;
                     }
 
-                    Rpc44SetRole.Deserialize(reader, out var role, out var canOverrideRole);
-                    canOverrideRole = true;
+                    Rpc44SetRole.Deserialize(reader, out var role, out var _);
 
                     if (role is RoleTypes.ImpostorGhost or RoleTypes.CrewmateGhost or RoleTypes.GuardianAngel)
                     {
@@ -399,7 +398,12 @@ namespace Impostor.Server.Net.Inner.Objects
                         await Game.StartedAsync();
                     }
 
-                    break;
+                    if (sender.Character != null)
+                    {
+                        await sender.Character.SetRoleAsync(role);
+                    }
+
+                    return false;
                 }
 
                 case RpcCalls.ProtectPlayer:

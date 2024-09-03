@@ -85,7 +85,7 @@ namespace Impostor.Server.Net.Inner.Objects
 
         public async ValueTask SetRoleAsync(RoleTypes role)
         {
-            using var writer = Game.StartRpc(NetId, RpcCalls.SendChat);
+            using var writer = Game.StartRpc(NetId, RpcCalls.SetRole);
             writer.Write((ushort)role);
             writer.Write(true);
             await Game.FinishRpcAsync(writer);
@@ -98,7 +98,7 @@ namespace Impostor.Server.Net.Inner.Objects
                 player = this;
             }
 
-            using var writer = Game.StartRpc(NetId, RpcCalls.SendChat);
+            using var writer = Game.StartRpc(NetId, RpcCalls.SetRole);
             writer.Write((ushort)role);
             writer.Write(true);
             await Game.FinishRpcAsync(writer, player.OwnerId);
@@ -116,7 +116,7 @@ namespace Impostor.Server.Net.Inner.Objects
 
             foreach (var pc in ClientManager.AllPlayerControls.Where(p => !players.Contains(p)))
             {
-                using var writer = Game.StartRpc(NetId, RpcCalls.SendChat);
+                using var writer = Game.StartRpc(NetId, RpcCalls.SetRole);
                 writer.Write((ushort)role);
                 writer.Write(true);
                 await Game.FinishRpcAsync(writer, pc.OwnerId);

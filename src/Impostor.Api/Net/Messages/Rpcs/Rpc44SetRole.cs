@@ -7,7 +7,7 @@ namespace Impostor.Api.Net.Messages.Rpcs
         public static void Serialize(IMessageWriter writer, RoleTypes role, bool canOverrideRole)
         {
             writer.Write((ushort)role);
-            writer.Write(true);
+            writer.Write(canOverrideRole);
         }
 
         public static void Deserialize(IMessageReader reader, out RoleTypes role, out bool canOverrideRole)
