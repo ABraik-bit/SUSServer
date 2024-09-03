@@ -18,6 +18,14 @@
     <Copyright>Copyright © AeonLucid 2020</Copyright>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Library</OutputType>
+    <langVersion>preview</langVersion>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Impostor.Api\Impostor.Api.csproj" />
     <PackageReference Include="Impostor.Hazel" Version="1.0.0" />

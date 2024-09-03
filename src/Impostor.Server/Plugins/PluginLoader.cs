@@ -14,7 +14,7 @@ namespace Impostor.Server.Plugins
 {
     public static class PluginLoader
     {
-        private static readonly ILogger Logger = Log.ForContext(typeof(PluginLoader));
+        private static readonly Serilog.ILogger Logger = Log.ForContext(typeof(PluginLoader));
 
         public static IHostBuilder UsePluginLoader(this IHostBuilder builder, PluginConfig config)
         {

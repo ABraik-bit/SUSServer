@@ -11,6 +11,7 @@ using Impostor.Api.Net.Manager;
 using Impostor.Hazel;
 using Impostor.Server.Events.Client;
 using Impostor.Server.Net.Factories;
+using Impostor.Server.Net.Inner.Objects;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -25,6 +26,9 @@ namespace Impostor.Server.Net.Manager
         private readonly CompatibilityConfig _compatibilityConfig;
         private readonly IClientFactory _clientFactory;
         private int _idLast;
+
+        public List<ClientBase> allClients = [];
+        public InnerPlayerControl[] AllPlayerControl => allClients.Select(c => c.Player.Character).Where(p => p != null).ToArray();
 
         public ClientManager(ILogger<ClientManager> logger, IEventManager eventManager, IClientFactory clientFactory, ICompatibilityManager compatibilityManager, IOptions<CompatibilityConfig> compatibilityConfig)
         {
@@ -133,6 +137,8 @@ namespace Impostor.Server.Net.Manager
             client.Id = id;
             _logger.LogTrace("Client connected.");
             _clients.TryAdd(id, client);
+
+            allClients.Add(client);
 
             await _eventManager.CallAsync(new ClientConnectedEvent(connection, client));
         }
