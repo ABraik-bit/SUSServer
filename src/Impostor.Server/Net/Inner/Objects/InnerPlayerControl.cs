@@ -383,7 +383,8 @@ namespace Impostor.Server.Net.Inner.Objects
                         return false;
                     }
 
-                    Rpc44SetRole.Deserialize(reader, out var role, out var _);
+                    Rpc44SetRole.Deserialize(reader, out var role, out var canOverrideRole);
+                    canOverrideRole = true;
 
                     if (role is RoleTypes.ImpostorGhost or RoleTypes.CrewmateGhost or RoleTypes.GuardianAngel)
                     {
