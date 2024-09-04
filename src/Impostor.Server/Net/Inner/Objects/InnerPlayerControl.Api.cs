@@ -86,18 +86,30 @@ namespace Impostor.Server.Net.Inner.Objects
 
         public async ValueTask SetRoleAsync(RoleTypes role, bool isIntro = false)
         {
-            using var writer = Game.StartRpc(NetId, RpcCalls.SetRole);
+            using var writer = Game.StartGameData();
 
-            /*
-            PlayerInfo.Disconnected = true;
-            writer.StartMessage(1);
-            writer.WritePacked(PlayerInfo.NetId);
-            await PlayerInfo.SerializeAsync(writer, false);
+            if (isIntro)
+            {
+                PlayerInfo.Disconnected = true;
+                writer.StartMessage(1);
+                writer.WritePacked(PlayerInfo.NetId);
+                await PlayerInfo.SerializeAsync(writer, false);
+                writer.EndMessage();
+            }
+
+            writer.StartMessage(GameDataTag.RpcFlag);
+            writer.WritePacked(NetId);
+            writer.Write((byte)RpcCalls.SetRole);
+
+            Rpc44SetRole.Serialize(writer, role, true);
             writer.EndMessage();
-            */
 
-            Rpc44SetRole.Serialize(writer, role, false);
-            await Game.FinishRpcAsync(writer);
+            await Game.FinishGameDataAsync(writer);
+
+            if (isIntro)
+            {
+                PlayerInfo.Disconnected = false;
+            }
         }
 
         public async ValueTask SetRoleForAsync(RoleTypes role, IInnerPlayerControl? player = null, bool isIntro = false)
@@ -107,9 +119,30 @@ namespace Impostor.Server.Net.Inner.Objects
                 player = this;
             }
 
-            using var writer = Game.StartRpc(NetId, RpcCalls.SetRole);
+            using var writer = Game.StartGameData();
+
+            if (isIntro)
+            {
+                PlayerInfo.Disconnected = true;
+                writer.StartMessage(1);
+                writer.WritePacked(PlayerInfo.NetId);
+                await PlayerInfo.SerializeAsync(writer, false);
+                writer.EndMessage();
+            }
+
+            writer.StartMessage(GameDataTag.RpcFlag);
+            writer.WritePacked(NetId);
+            writer.Write((byte)RpcCalls.SetRole);
+
             Rpc44SetRole.Serialize(writer, role, true);
-            await Game.FinishRpcAsync(writer, player.OwnerId);
+            writer.EndMessage();
+
+            await Game.FinishGameDataAsync(writer, Game.Players.Select(p => p.Client).First(p => p.Player?.Character == player).Id);
+
+            if (isIntro)
+            {
+                PlayerInfo.Disconnected = false;
+            }
         }
 
         public async ValueTask SetRoleForDesync(RoleTypes role, IInnerPlayerControl?[] players, bool isIntro = false)
@@ -122,11 +155,37 @@ namespace Impostor.Server.Net.Inner.Objects
                 }
             }
 
-            foreach (var pc in ClientManager.AllPlayerControls.Where(p => !players.Contains(p)))
+            foreach (var pc in Game.Players.Select(p => p.Character).Where(p => !players.Contains(p)))
             {
-                using var writer = Game.StartRpc(NetId, RpcCalls.SetRole);
+                if (pc == null)
+                {
+                    continue;
+                }
+
+                using var writer = Game.StartGameData();
+
+                if (isIntro)
+                {
+                    PlayerInfo.Disconnected = true;
+                    writer.StartMessage(1);
+                    writer.WritePacked(PlayerInfo.NetId);
+                    await PlayerInfo.SerializeAsync(writer, false);
+                    writer.EndMessage();
+                }
+
+                writer.StartMessage(GameDataTag.RpcFlag);
+                writer.WritePacked(NetId);
+                writer.Write((byte)RpcCalls.SetRole);
+
                 Rpc44SetRole.Serialize(writer, role, true);
-                await Game.FinishRpcAsync(writer, pc.OwnerId);
+                writer.EndMessage();
+
+                await Game.FinishGameDataAsync(writer, Game.Players.Select(p => p.Client).First(p => p.Player?.Character == pc).Id);
+
+                if (isIntro)
+                {
+                    PlayerInfo.Disconnected = false;
+                }
             }
         }
 

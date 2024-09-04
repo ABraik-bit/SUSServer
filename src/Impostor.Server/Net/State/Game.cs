@@ -121,6 +121,16 @@ namespace Impostor.Server.Net.State
             {
                 foreach (var player in _players.Values)
                 {
+                    if (player?.Character != null)
+                    {
+                        using var writer = StartGameData();
+                        writer.StartMessage(1);
+                        writer.WritePacked(player.Character.PlayerInfo.NetId);
+                        await player.Character.PlayerInfo.SerializeAsync(writer, false);
+                        writer.EndMessage();
+                        await FinishGameDataAsync(writer);
+                    }
+
                     if (GameNet.ShipStatus != null)
                     {
                         await player.Character!.NetworkTransform.SetPositionAsync(player, GameNet.ShipStatus.GetSpawnLocation(player.Character, PlayerCount, true));
