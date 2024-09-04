@@ -399,14 +399,7 @@ namespace Impostor.Server.Net.Inner.Objects
                         await Game.StartedAsync();
                     }
 
-                    await SetRoleAsync(role, true);
-
-                    /*
-                    using var writer = Game.StartRpc(NetId, RpcCalls.SetInfected);
-                    PlayerInfo.Disconnected = true;
-                    await PlayerInfo.SerializeAsync(writer, false);
-                    await Game.FinishRpcAsync(writer);
-                    */
+                    await SetRoleAsync(role/*, true*/);
 
                     return false;
                 }
