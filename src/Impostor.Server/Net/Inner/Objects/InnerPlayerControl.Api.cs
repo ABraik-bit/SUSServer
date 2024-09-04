@@ -86,22 +86,8 @@ namespace Impostor.Server.Net.Inner.Objects
         public async ValueTask SetRoleAsync(RoleTypes role, bool isIntro = false)
         {
             using var writer = Game.StartRpc(NetId, RpcCalls.SetRole);
-
-            if (isIntro)
-            {
-                PlayerInfo.Disconnected = true;
-                await PlayerInfo.SerializeAsync(writer, false);
-            }
-
-            Rpc44SetRole.Serialize(writer, role, true);
-
+            Rpc44SetRole.Serialize(writer, role, false);
             await Game.FinishRpcAsync(writer);
-
-            if (isIntro)
-            {
-                PlayerInfo.Disconnected = false;
-                await PlayerInfo.SerializeAsync(writer, false);
-            }
         }
 
         public async ValueTask SetRoleForAsync(RoleTypes role, IInnerPlayerControl? player = null, bool isIntro = false)

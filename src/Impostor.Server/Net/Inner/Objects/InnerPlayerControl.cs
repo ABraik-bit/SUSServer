@@ -20,6 +20,7 @@ using Impostor.Server.Net.Inner.Objects.Components;
 using Impostor.Server.Net.State;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Impostor.Server.Net.Inner.Objects
 {
@@ -398,15 +399,16 @@ namespace Impostor.Server.Net.Inner.Objects
                         await Game.StartedAsync();
                     }
 
+                    await SetRoleAsync(role, true);
+
                     /*
-                    if (sender.Character != null)
-                    {
-                        await sender.Character.SetRoleAsync(role, true);
-                    }
+                    using var writer = Game.StartRpc(NetId, RpcCalls.SetInfected);
+                    PlayerInfo.Disconnected = true;
+                    await PlayerInfo.SerializeAsync(writer, false);
+                    await Game.FinishRpcAsync(writer);
+                    */
 
                     return false;
-                    */
-                    break;
                 }
 
                 case RpcCalls.ProtectPlayer:
