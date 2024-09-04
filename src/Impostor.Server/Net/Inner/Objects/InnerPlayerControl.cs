@@ -15,6 +15,7 @@ using Impostor.Api.Net.Inner;
 using Impostor.Api.Net.Inner.Objects;
 using Impostor.Api.Net.Messages.Rpcs;
 using Impostor.Api.Utils;
+using Impostor.Hazel;
 using Impostor.Server.Events.Player;
 using Impostor.Server.Net.Inner.Objects.Components;
 using Impostor.Server.Net.State;
@@ -399,7 +400,7 @@ namespace Impostor.Server.Net.Inner.Objects
                         await Game.StartedAsync();
                     }
 
-                    await SetRoleAsync(role/*, true*/);
+                    await SetRoleAsync(role, true);
 
                     return false;
                 }

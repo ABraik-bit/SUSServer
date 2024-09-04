@@ -88,15 +88,11 @@ namespace Impostor.Server.Net.Inner.Objects
             using var writer = Game.StartRpc(NetId, RpcCalls.SetRole);
 
             /*
-            if (isIntro)
-            {
-                PlayerInfo.Disconnected = true;
-
-                writer.StartMessage(1);
-                writer.WritePacked(NetId);
-                await PlayerInfo.SerializeAsync(writer, false);
-                writer.EndMessage();
-            }
+            PlayerInfo.Disconnected = true;
+            writer.StartMessage(1);
+            writer.WritePacked(PlayerInfo.NetId);
+            await PlayerInfo.SerializeAsync(writer, false);
+            writer.EndMessage();
             */
 
             Rpc44SetRole.Serialize(writer, role, true);
