@@ -79,35 +79,6 @@ namespace Impostor.Api.Net.Inner.Objects
         ValueTask SendChatAsync(string text);
 
         /// <summary>
-        ///     Sets the role for the current <see cref="IInnerPlayerControl" />.
-        ///     Optionally sends an introductory message if specified.
-        /// </summary>
-        /// <param name="role">The role to assign.</param>
-        /// <param name="isIntro">Whether to send an introductory message.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        ValueTask SetRoleAsync(RoleTypes role, bool isIntro = false);
-
-        /// <summary>
-        ///     Sets the role for a specified player or the current <see cref="IInnerPlayerControl" />.
-        ///     Optionally sends an introductory message if specified.
-        /// </summary>
-        /// <param name="role">The role to assign.</param>
-        /// <param name="player">The player to assign the role to. If null, assigns to the current player.</param>
-        /// <param name="isIntro">Whether to send an introductory message.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        ValueTask SetRoleForAsync(RoleTypes role, IInnerPlayerControl? player = null, bool isIntro = false);
-
-        /// <summary>
-        ///     Sets the role for multiple players, ensuring synchronization across all players.
-        ///     Optionally sends an introductory message if specified.
-        /// </summary>
-        /// <param name="role">The role to assign.</param>
-        /// <param name="players">The array of players to assign the role to. If null, assigns to the current player.</param>
-        /// <param name="isIntro">Whether to send an introductory message.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        ValueTask SetRoleForDesync(RoleTypes role, IInnerPlayerControl?[] players, bool isIntro = false);
-
-        /// <summary>
         ///     Send a chat message as the current <see cref="IInnerPlayerControl" />.
         ///     Visible to only the current.
         /// </summary>

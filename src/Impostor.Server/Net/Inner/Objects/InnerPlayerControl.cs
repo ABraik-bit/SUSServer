@@ -16,6 +16,7 @@ using Impostor.Api.Net.Inner.Objects;
 using Impostor.Api.Net.Messages.Rpcs;
 using Impostor.Api.Utils;
 using Impostor.Hazel;
+using Impostor.Server.Custom;
 using Impostor.Server.Events.Player;
 using Impostor.Server.Net.Inner.Objects.Components;
 using Impostor.Server.Net.State;
@@ -395,11 +396,12 @@ namespace Impostor.Server.Net.Inner.Objects
 
                     PlayerInfo.RoleType = role;
 
-                    _ = SetRoleForAsync(role, this, true);
-                    _ = SetRoleForDesync(RoleTypes.Crewmate, [this, Game.Host?.Character], true);
+                    _ = this.SetRoleForAsync(Game, role, this, true);
+                    _ = this.SetRoleForDesync(Game, PlayerInfo.IsDead ? RoleTypes.CrewmateGhost : RoleTypes.Crewmate, [this, Game.Host?.Character], true);
 
                     if (Game.GameState == GameStates.Starting && Game.Players.All(clientPlayer => clientPlayer.Character?.PlayerInfo.RoleType != null))
                     {
+                        _ = RoleManager.SyncData(Game);
                         await Game.StartedAsync();
                     }
 
