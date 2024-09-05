@@ -119,7 +119,7 @@ namespace Impostor.Server.Net.Inner.Objects
                 player = this;
             }
 
-            using var writer = Game.StartGameData();
+            using var writer = Game.StartGameData(Game.Players.Select(p => p.Client).First(p => p.Player?.Character == player).Id);
 
             if (isIntro)
             {
@@ -155,14 +155,14 @@ namespace Impostor.Server.Net.Inner.Objects
                 }
             }
 
-            foreach (var pc in Game.Players.Select(p => p.Character).Where(p => !players.Contains(p)))
+            foreach (var pc in Game.Players.Select(p => p.Character))
             {
-                if (pc == null)
+                if (pc == null || players.Contains(pc))
                 {
                     continue;
                 }
 
-                using var writer = Game.StartGameData();
+                using var writer = Game.StartGameData(Game.Players.Select(p => p.Client).First(p => p.Player?.Character == pc).Id);
 
                 if (isIntro)
                 {

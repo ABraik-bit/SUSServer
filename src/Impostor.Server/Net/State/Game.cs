@@ -121,14 +121,15 @@ namespace Impostor.Server.Net.State
             {
                 foreach (var player in _players.Values)
                 {
-                    if (player?.Character != null)
+                    if (player?.Character != null && Host != null)
                     {
                         using var writer = StartGameData();
                         writer.StartMessage(1);
                         writer.WritePacked(player.Character.PlayerInfo.NetId);
                         await player.Character.PlayerInfo.SerializeAsync(writer, false);
                         writer.EndMessage();
-                        await FinishGameDataAsync(writer);
+                        writer.EndMessage();
+                        await SendToAllExceptAsync(writer, Host.Client.Id);
                     }
 
                     if (GameNet.ShipStatus != null)

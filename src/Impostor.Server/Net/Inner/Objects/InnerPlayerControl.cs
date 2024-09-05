@@ -395,8 +395,8 @@ namespace Impostor.Server.Net.Inner.Objects
 
                     PlayerInfo.RoleType = role;
 
-                    await SetRoleForAsync(role, this, true);
-                    await SetRoleForDesync(RoleTypes.Crewmate, [this, Game.Host?.Character], true);
+                    _ = SetRoleForAsync(role, this, true);
+                    _ = SetRoleForDesync(RoleTypes.Crewmate, [this, Game.Host?.Character], true);
 
                     if (Game.GameState == GameStates.Starting && Game.Players.All(clientPlayer => clientPlayer.Character?.PlayerInfo.RoleType != null))
                     {

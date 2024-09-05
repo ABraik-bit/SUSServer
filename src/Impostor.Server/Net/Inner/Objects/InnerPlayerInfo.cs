@@ -200,10 +200,12 @@ namespace Impostor.Server.Net.Inner.Objects
 
         private void SetTasks(ReadOnlyMemory<byte> taskTypeIds)
         {
+            /*
             if (Disconnected)
             {
                 return;
             }
+            */
 
             Tasks = new List<TaskInfo>(taskTypeIds.Length);
 
