@@ -15,7 +15,9 @@ using Impostor.Api.Net;
 using Impostor.Api.Net.Inner.Objects;
 using Impostor.Api.Net.Manager;
 using Impostor.Api.Net.Messages.S2C;
+using Impostor.Server.Custom;
 using Impostor.Server.Events;
+using Impostor.Server.Net.Inner.Objects;
 using Impostor.Server.Net.Manager;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -93,6 +95,8 @@ namespace Impostor.Server.Net.State
         public ClientPlayer? Host => _players.GetValueOrDefault(HostId);
 
         public IEnumerable<IClientPlayer> Players => _players.Select(p => p.Value);
+
+        public IEnumerable<ClientPlayer> ClientPlayers => (IEnumerable<ClientPlayer>)_players.Values;
 
         public bool IsHostAuthoritive => Host != null && Host.Client.GameVersion.HasDisableServerAuthorityFlag;
 

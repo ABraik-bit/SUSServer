@@ -11,7 +11,9 @@ using Impostor.Api.Net.Messages;
 using Impostor.Api.Net.Messages.C2S;
 using Impostor.Api.Net.Messages.S2C;
 using Impostor.Hazel;
+using Impostor.Server.Custom;
 using Impostor.Server.Net.Manager;
+using Impostor.Server.Net.State;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -264,6 +266,8 @@ namespace Impostor.Server.Net
                     {
                         return;
                     }
+
+                    _ = RoleManager.ResyncRoles(_clientManager.Clients.First(c => c?.Player?.Game != null).Player.Game);
 
                     Message08EndGameC2S.Deserialize(
                         reader,

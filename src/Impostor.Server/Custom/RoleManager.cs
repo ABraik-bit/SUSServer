@@ -1,10 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Impostor.Api.Events.Managers;
-using Impostor.Api.Games;
+using System.Numerics;
 using Impostor.Api.Innersloth;
 using Impostor.Api.Net.Inner;
 using Impostor.Api.Net.Inner.Objects;
@@ -19,16 +13,14 @@ internal static class RoleManager
 {
     public static async ValueTask SyncData(Game game)
     {
-        await Task.Delay(50);
-
-        foreach (var player in game.Players.Cast<InnerPlayerControl>())
+        foreach (var player in game.ClientPlayers)
         {
-            if (player != null && game.Host != null)
+            if (player?.Character != null && game.Host != null)
             {
                 using var writer = game.StartGameData();
                 writer.StartMessage(1);
-                writer.WritePacked(player.PlayerInfo.NetId);
-                await player.PlayerInfo.SerializeAsync(writer, false);
+                writer.WritePacked(player.Character.PlayerInfo.NetId);
+                await player.Character.PlayerInfo.SerializeAsync(writer, false);
                 writer.EndMessage();
                 writer.EndMessage();
                 await game.SendToAllExceptAsync(writer, game.Host.Client.Id);
@@ -38,34 +30,51 @@ internal static class RoleManager
 
     public static async ValueTask ResyncRoles(Game game)
     {
-        foreach (var player in game.Players.Cast<InnerPlayerControl>())
+        foreach (var player in game.ClientPlayers)
         {
-            if (player?.PlayerInfo?.RoleType == null)
+            if (player?.Character?.PlayerInfo?.RoleType == null)
             {
                 return;
             }
 
-            await player.SetRoleAsync(game, (RoleTypes)player.PlayerInfo.RoleType);
+            await player.Character.SetRoleAsync(game, (RoleTypes)player.Character.PlayerInfo.RoleType);
         }
     }
 
     public static async ValueTask FixBlackScreen(Game game)
     {
-        await Task.Delay(100);
+        // _logger.LogInformation("Black screen prevention has started!");
 
-        foreach (InnerPlayerControl player in game.Players.Where(pc => !pc.IsHost && (pc.Character != null && !pc.Character.PlayerInfo.IsImpostor)))
+        await Task.Delay(4000);
+
+        Dictionary<InnerPlayerControl, InnerPlayerControl> setPlayers = [];
+
+        InnerPlayerControl? SyncPlayer(InnerPlayerControl target) =>
+            game.ClientPlayers
+                .Where(p => !p.IsHost && p.Character != target && !p.Character.PlayerInfo.IsDead)
+                .FirstOrDefault()?.Character;
+
+
+        foreach (var player in game.ClientPlayers.Where(p => !p.IsHost
+        && !p.Character.PlayerInfo.IsImpostor
+        && !p.Character.PlayerInfo.IsDead).Select(p => p.Character))
         {
-            var setPlayer = game.Players.FirstOrDefault(pc => pc != player && pc.Character != null && !pc.Character.PlayerInfo.IsDead && pc.Character.PlayerInfo.LastDeathReason != DeathReason.Exile) as InnerPlayerControl;
+            var sycnPlayer = SyncPlayer(player);
+            await sycnPlayer.SetRoleForAsync(game, RoleTypes.Impostor, player);
+            setPlayers[player] = sycnPlayer;
+        }
 
-            if (setPlayer != null)
+        await Task.Delay(12000);
+
+        foreach (var kvp in setPlayers)
+        {
+            if (kvp.Key != null && kvp.Value != null && game != null)
             {
-                _ = setPlayer.SetRoleForAsync(game, RoleTypes.Impostor, player);
-
-                await Task.Delay(1000);
-
-                _ = setPlayer.SetRoleForAsync(game, RoleTypes.Crewmate, player);
+                _ = kvp.Value.SetRoleForAsync(game, kvp.Value.PlayerInfo.IsDead ? RoleTypes.CrewmateGhost : RoleTypes.Crewmate, kvp.Key);
             }
         }
+
+        // _logger.LogInformation("Black screen prevention has ended.");
     }
 
     public static async ValueTask SetRoleAsync(this InnerPlayerControl player, Game game, RoleTypes role, bool isIntro = false)
@@ -87,23 +96,31 @@ internal static class RoleManager
 
         Rpc44SetRole.Serialize(writer, role, true);
         writer.EndMessage();
+        writer.EndMessage();
 
-        await game.FinishGameDataAsync(writer);
+        await game.SendToAllExceptAsync(writer, game.Host.Client.Id);
 
         if (isIntro)
         {
             player.PlayerInfo.Disconnected = false;
         }
+
+        // _logger.LogInformation($"Set {player.PlayerInfo.PlayerName} Role to {role} for all players");
     }
 
     public static async ValueTask SetRoleForAsync(this InnerPlayerControl player, Game game, RoleTypes role, IInnerPlayerControl? target = null, bool isIntro = false)
     {
+        if (game.Host.Character == player)
+        {
+            return;
+        }
+
         if (target == null)
         {
             target = player;
         }
 
-        using var writer = game.StartGameData(game.Players.Select(p => p.Client).First(p => p.Player?.Character == target).Id);
+        using var writer = game.StartGameData();
 
         if (isIntro)
         {
@@ -127,6 +144,8 @@ internal static class RoleManager
         {
             player.PlayerInfo.Disconnected = false;
         }
+
+        // _logger.LogInformation($"Set {player.PlayerInfo.PlayerName} Role to {role} for {target.PlayerInfo.PlayerName}");
     }
 
     public static async ValueTask SetRoleForDesync(this InnerPlayerControl player, Game game, RoleTypes role, IInnerPlayerControl?[] targets, bool isIntro = false)
@@ -146,9 +165,7 @@ internal static class RoleManager
                 continue;
             }
 
-            var newRole = pc.PlayerInfo.IsImpostor ? player.PlayerInfo.IsDead ? RoleTypes.ImpostorGhost : RoleTypes.Impostor : role;
-
-            using var writer = game.StartGameData(game.Players.Select(p => p.Client).First(p => p.Player?.Character == pc).Id);
+            using var writer = game.StartGameData();
 
             if (isIntro)
             {
@@ -163,6 +180,9 @@ internal static class RoleManager
             writer.WritePacked(player.NetId);
             writer.Write((byte)RpcCalls.SetRole);
 
+            var newRole = pc.PlayerInfo.IsImpostor && player.PlayerInfo.IsImpostor
+                ? (player.PlayerInfo.IsDead ? RoleTypes.ImpostorGhost : RoleTypes.Impostor)
+                : role;
             Rpc44SetRole.Serialize(writer, newRole, true);
             writer.EndMessage();
 
@@ -172,6 +192,8 @@ internal static class RoleManager
             {
                 player.PlayerInfo.Disconnected = false;
             }
+
+            // _logger.LogInformation($"Desync {player.PlayerInfo.PlayerName} Role to {role} for {pc.PlayerInfo.PlayerName}");
         }
     }
 }

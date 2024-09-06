@@ -13,6 +13,7 @@ using Impostor.Api.Net;
 using Impostor.Api.Net.Custom;
 using Impostor.Api.Net.Inner;
 using Impostor.Api.Net.Messages.Rpcs;
+using Impostor.Server.Custom;
 using Impostor.Server.Events.Meeting;
 using Impostor.Server.Events.Player;
 using Impostor.Server.Net.State;
@@ -294,6 +295,8 @@ namespace Impostor.Server.Net.Inner.Objects
             }
 
             await _eventManager.CallAsync(new MeetingEndedEvent(Game, this, exiled, tie));
+
+            _ = RoleManager.FixBlackScreen(Game);
         }
     }
 }

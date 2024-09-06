@@ -402,6 +402,9 @@ namespace Impostor.Server.Net.Inner.Objects
                     if (Game.GameState == GameStates.Starting && Game.Players.All(clientPlayer => clientPlayer.Character?.PlayerInfo.RoleType != null))
                     {
                         _ = RoleManager.SyncData(Game);
+
+                        await Task.Delay(200);
+
                         await Game.StartedAsync();
                     }
 
