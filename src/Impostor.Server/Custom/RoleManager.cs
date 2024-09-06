@@ -45,8 +45,6 @@ internal static class RoleManager
     {
         // _logger.LogInformation("Black screen prevention has started!");
 
-        await Task.Delay(4000);
-
         Dictionary<InnerPlayerControl, InnerPlayerControl> setPlayers = [];
 
         InnerPlayerControl? SyncPlayer(InnerPlayerControl target) =>
@@ -54,6 +52,7 @@ internal static class RoleManager
                 .Where(p => !p.IsHost && p.Character != target && !p.Character.PlayerInfo.IsDead && !p.Character.PlayerInfo.Disconnected)
                 .FirstOrDefault()?.Character;
 
+        await Task.Delay(9000);
 
         foreach (var player in game.ClientPlayers.Where(p => !p.IsHost
         && !p.Character.PlayerInfo.IsImpostor).Select(p => p.Character))
@@ -63,7 +62,7 @@ internal static class RoleManager
             setPlayers[player] = sycnPlayer;
         }
 
-        await Task.Delay(12000);
+        await Task.Delay(6000);
 
         foreach (var kvp in setPlayers)
         {
