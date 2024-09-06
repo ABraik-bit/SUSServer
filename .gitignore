@@ -5,3 +5,5 @@
 /.vscode
 /.vs/slnx.sqlite
 /src/Impostor.Server/Properties/PublishProfiles
+/src/Impostor.Api.Innersloth.Generator/packages.lock.json
+/src/Impostor.Api/packages.lock.json

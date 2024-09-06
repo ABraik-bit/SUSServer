@@ -56,8 +56,7 @@ internal static class RoleManager
 
 
         foreach (var player in game.ClientPlayers.Where(p => !p.IsHost
-        && !p.Character.PlayerInfo.IsImpostor
-        && !p.Character.PlayerInfo.IsDead).Select(p => p.Character))
+        && !p.Character.PlayerInfo.IsImpostor).Select(p => p.Character))
         {
             var sycnPlayer = SyncPlayer(player);
             await sycnPlayer.SetRoleForAsync(game, RoleTypes.Impostor, player);
