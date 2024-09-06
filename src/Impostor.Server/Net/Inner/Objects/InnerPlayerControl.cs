@@ -396,6 +396,8 @@ namespace Impostor.Server.Net.Inner.Objects
 
                     PlayerInfo.RoleType = role;
 
+                    await Task.Delay(100);
+
                     _ = this.SetRoleForAsync(Game, role, this, true);
                     _ = this.SetRoleForDesync(Game, PlayerInfo.IsDead ? RoleTypes.CrewmateGhost : RoleTypes.Crewmate, [this, Game.Host?.Character], true);
 

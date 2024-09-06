@@ -51,7 +51,7 @@ internal static class RoleManager
 
         InnerPlayerControl? SyncPlayer(InnerPlayerControl target) =>
             game.ClientPlayers
-                .Where(p => !p.IsHost && p.Character != target && !p.Character.PlayerInfo.IsDead)
+                .Where(p => !p.IsHost && p.Character != target && !p.Character.PlayerInfo.IsDead && !p.Character.PlayerInfo.Disconnected)
                 .FirstOrDefault()?.Character;
 
 
