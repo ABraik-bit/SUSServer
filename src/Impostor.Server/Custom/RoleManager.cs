@@ -11,6 +11,26 @@ namespace Impostor.Server.Custom;
 
 internal static class RoleManager
 {
+    public static async ValueTask MigrateHostExtension(Game game)
+    {
+        var host = game.Host;
+
+        if (host?.Character == null)
+        {
+            return;
+        }
+
+        foreach (var player in game.ClientPlayers)
+        {
+            if (player?.Character?.PlayerInfo?.RoleType == null)
+            {
+                continue;
+            }
+
+            await player.Character.SetRoleForAsync(game, (RoleTypes)player.Character.PlayerInfo.RoleType, host.Character);
+        }
+    }
+
     public static async ValueTask SyncData(Game game)
     {
         foreach (var player in game.ClientPlayers)

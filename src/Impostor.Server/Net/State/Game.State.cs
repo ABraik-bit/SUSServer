@@ -4,6 +4,7 @@ using Impostor.Api;
 using Impostor.Api.Innersloth;
 using Impostor.Api.Net;
 using Impostor.Hazel;
+using Impostor.Server.Custom;
 using Impostor.Server.Events;
 using Impostor.Server.Net.Hazel;
 using Microsoft.Extensions.Logging;
@@ -116,6 +117,7 @@ namespace Impostor.Server.Net.State
             }
 
             HostId = host.Client.Id;
+            await RoleManager.MigrateHostExtension(host.Game);
             _logger.LogInformation("{0} - Assigned {1} ({2}) as new host.", Code, host.Client.Name, host.Client.Id);
 
             // Check our current game state.
