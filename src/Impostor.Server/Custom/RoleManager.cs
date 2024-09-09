@@ -65,24 +65,42 @@ internal static class RoleManager
     {
         // _logger.LogInformation("Black screen prevention has started!");
 
-        Dictionary<InnerPlayerControl, InnerPlayerControl> setPlayers = [];
+        var alivePlayers = game.ClientPlayers.Where(pc => pc?.Character?.PlayerInfo != null && !pc.Character.PlayerInfo.IsDead && !pc.Character.PlayerInfo.Disconnected);
+
+        if (alivePlayers.Where(pc => pc.Character != null && !pc.Character.PlayerInfo.IsImpostor).Count() <=
+            alivePlayers.Where(pc => pc.Character != null && pc.Character.PlayerInfo.IsImpostor).Count())
+        {
+            return;
+        }
 
         InnerPlayerControl? SyncPlayer(InnerPlayerControl target) =>
             game.ClientPlayers
-                .Where(p => !p.IsHost && p.Character != target && !p.Character.PlayerInfo.IsDead && !p.Character.PlayerInfo.Disconnected)
-                .FirstOrDefault()?.Character;
+                .Where(p => p.Character != null && !p.Character.PlayerInfo.IsDead && !p.Character.PlayerInfo.Disconnected && p.Character.PlayerId != target.PlayerId)
+                .First()?.Character;
 
         await Task.Delay(9000);
 
+        Dictionary<InnerPlayerControl, InnerPlayerControl> setPlayers = [];
+
         foreach (var player in game.ClientPlayers.Where(p => !p.IsHost
-        && !p.Character.PlayerInfo.IsImpostor).Select(p => p.Character))
+        && p.Character != null && !p.Character.PlayerInfo.IsImpostor).Select(p => p.Character))
         {
+            if (player == null)
+            {
+                continue;
+            }
+
             var sycnPlayer = SyncPlayer(player);
-            await sycnPlayer.SetRoleForAsync(game, RoleTypes.Impostor, player);
+            if (sycnPlayer == null)
+            {
+                continue;
+            }
+
+            _ = sycnPlayer.SetRoleForAsync(game, RoleTypes.Impostor, player);
             setPlayers[player] = sycnPlayer;
         }
 
-        await Task.Delay(6000);
+        await Task.Delay(3500);
 
         foreach (var kvp in setPlayers)
         {
@@ -128,7 +146,7 @@ internal static class RoleManager
 
     public static async ValueTask SetRoleForAsync(this InnerPlayerControl player, Game game, RoleTypes role, IInnerPlayerControl? target = null, bool isIntro = false)
     {
-        if (game.Host.Character == player)
+        if (game.Host.Character == target)
         {
             return;
         }
