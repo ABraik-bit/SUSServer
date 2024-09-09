@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 using Impostor.Api;
 using Impostor.Api.Events.Managers;
+using Impostor.Api.Games;
 using Impostor.Api.Innersloth;
 using Impostor.Api.Innersloth.Customization;
 using Impostor.Api.Innersloth.GameOptions;
@@ -136,7 +139,7 @@ namespace Impostor.Server.Net.Inner.Objects
 
                     Rpc01CompleteTask.Deserialize(reader, out var taskId);
                     await HandleCompleteTask(sender, taskId);
-                    break;
+                    return false;
                 }
 
                 case RpcCalls.SyncSettings:
@@ -409,11 +412,9 @@ namespace Impostor.Server.Net.Inner.Objects
 
                     await Task.Delay(100);
 
-                    _ = this.SetRoleForAsync(Game, role, this, true);
-                    _ = this.SetRoleForDesync(Game, PlayerInfo.IsDead ? RoleTypes.CrewmateGhost : RoleTypes.Crewmate, [this, Game.Host?.Character], true);
-
                     if (Game.GameState == GameStates.Starting && Game.Players.All(clientPlayer => clientPlayer.Character?.PlayerInfo.RoleType != null))
                     {
+                        await RoleManager.AssignRoles(Game);
                         _ = RoleManager.SyncData(Game);
 
                         await Task.Delay(200);
@@ -627,6 +628,14 @@ namespace Impostor.Server.Net.Inner.Objects
             {
                 task.Complete = true;
                 await _eventManager.CallAsync(new PlayerCompletedTaskEvent(Game, sender, this, task));
+
+                using var writer = Game.StartGameData();
+                writer.StartMessage(GameDataTag.RpcFlag);
+                writer.WritePacked(NetId);
+                writer.Write((byte)RpcCalls.CompleteTask);
+                Rpc01CompleteTask.Serialize(writer, taskId);
+                writer.EndMessage();
+                await Game.FinishGameDataAsync(writer, Game?.Host?.Client.Id);
             }
             else
             {

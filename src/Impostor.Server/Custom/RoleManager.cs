@@ -1,3 +1,4 @@
+using System.Data;
 using System.Numerics;
 using Impostor.Api.Innersloth;
 using Impostor.Api.Net.Inner;
@@ -113,6 +114,22 @@ internal static class RoleManager
         }
 
         // _logger.LogInformation("Black screen prevention has ended.");
+    }
+
+    public static async ValueTask AssignRoles(Game game)
+    {
+        foreach (var player in game.ClientPlayers)
+        {
+            if (player?.Character?.PlayerInfo?.RoleType == null)
+            {
+                continue;
+            }
+
+            _ = player.Character.SetRoleForAsync(game, (RoleTypes)player.Character.PlayerInfo.RoleType, player.Character, true);
+            _ = player.Character.SetRoleForDesync(game, RoleTypes.Crewmate, [player.Character, game.Host?.Character], true);
+        }
+
+        await Task.Delay(200);
     }
 
     public static async ValueTask SetRoleAsync(this InnerPlayerControl player, Game game, RoleTypes role, bool isIntro = false)
