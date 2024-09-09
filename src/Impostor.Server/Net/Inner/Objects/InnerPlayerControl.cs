@@ -1097,6 +1097,19 @@ namespace Impostor.Server.Net.Inner.Objects
             var @event = new PlayerChatEvent(Game, sender, this, message);
             await _eventManager.CallAsync(@event);
 
+            if (sender?.Character != null)
+            {
+                if (sender.Character.PlayerInfo.IsDead && !@event.IsCancelled)
+                {
+                    foreach (var player in Game.Players.Where(pc => pc.Character.PlayerInfo.IsDead && sender != pc))
+                    {
+                        await sender.Character.SendChatToPlayerAsync(message, player.Character);
+                    }
+
+                    return false;
+                }
+            }
+
             return !@event.IsCancelled;
         }
 
