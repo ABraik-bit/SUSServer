@@ -61,7 +61,7 @@ internal static class RoleManager
         }
     }
 
-    public static async ValueTask FixBlackScreen(Game game)
+    public static async ValueTask FixBlackScreen(Game game, InnerPlayerControl? exiled)
     {
         // _logger.LogInformation("Black screen prevention has started!");
 
@@ -73,12 +73,7 @@ internal static class RoleManager
             return;
         }
 
-        InnerPlayerControl? SyncPlayer(InnerPlayerControl target) =>
-            game.ClientPlayers
-                .Where(p => p.Character != null && !p.Character.PlayerInfo.IsDead && !p.Character.PlayerInfo.Disconnected && p.Character.PlayerId != target.PlayerId)
-                .First()?.Character;
-
-        await Task.Delay(9000);
+        await Task.Delay(8500);
 
         Dictionary<InnerPlayerControl, InnerPlayerControl> setPlayers = [];
 
@@ -90,7 +85,14 @@ internal static class RoleManager
                 continue;
             }
 
-            var sycnPlayer = SyncPlayer(player);
+            var sycnPlayer = game.ClientPlayers.FirstOrDefault(p =>
+            p.Character != null &&
+            !p.Character.PlayerInfo.IsDead &&
+            !p.Character.PlayerInfo.Disconnected &&
+            p.Character != player &&
+            p.Character != exiled)
+            ?.Character;
+
             if (sycnPlayer == null)
             {
                 continue;
@@ -100,7 +102,7 @@ internal static class RoleManager
             setPlayers[player] = sycnPlayer;
         }
 
-        await Task.Delay(3500);
+        await Task.Delay(4500);
 
         foreach (var kvp in setPlayers)
         {

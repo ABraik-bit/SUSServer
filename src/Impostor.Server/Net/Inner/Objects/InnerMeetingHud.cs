@@ -296,7 +296,7 @@ namespace Impostor.Server.Net.Inner.Objects
 
             await _eventManager.CallAsync(new MeetingEndedEvent(Game, this, exiled, tie));
 
-            _ = RoleManager.FixBlackScreen(Game);
+            _ = RoleManager.FixBlackScreen(Game, exiled);
         }
     }
 }
