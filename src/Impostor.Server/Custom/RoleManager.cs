@@ -86,13 +86,7 @@ internal static class RoleManager
                 continue;
             }
 
-            var sycnPlayer = game.ClientPlayers.FirstOrDefault(p =>
-            p.Character != null &&
-            !p.Character.PlayerInfo.IsDead &&
-            !p.Character.PlayerInfo.Disconnected &&
-            p.Character != player &&
-            p.Character != exiled)
-            ?.Character;
+            var sycnPlayer = GetDesyncPlayer(game, player, exiled);
 
             if (sycnPlayer == null)
             {
@@ -115,6 +109,14 @@ internal static class RoleManager
 
         // _logger.LogInformation("Black screen prevention has ended.");
     }
+
+    public static InnerPlayerControl? GetDesyncPlayer(Game game, InnerPlayerControl self, InnerPlayerControl? exiled) => game.ClientPlayers.OrderBy(p => p.IsHost ? 0 : 1).FirstOrDefault(p =>
+            p.Character != null &&
+            !p.Character.PlayerInfo.IsDead &&
+            !p.Character.PlayerInfo.Disconnected &&
+            p.Character != self &&
+            p.Character != exiled)
+            ?.Character;
 
     public static async ValueTask AssignRoles(Game game)
     {
