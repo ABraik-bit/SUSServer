@@ -317,17 +317,6 @@ namespace Impostor.Server.Net.Inner.Objects
                         return false;
                     }
 
-                    // sus
-                    if (sender?.Character != null &&
-                        (sender.Character.PlayerInfo.IsImpostor
-                        || !sender.Character.PlayerInfo.Tasks.Select(t => t.Task).Select(task => task?.Id).Any(id => id == (uint)TaskTypes.SubmitScan)))
-                    {
-                        if (await sender.Client.ReportCheatAsync(call, CheatCategory.GameFlow, "Failed scanner check"))
-                        {
-                            return false;
-                        }
-                    }
-
                     Rpc15SetScanner.Deserialize(reader, out var on, out var scannerCount);
                     break;
                 }
